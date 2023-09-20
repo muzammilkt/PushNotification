@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "756414774992",
+    "project_id": "fir-test-cf0fa",
+    "storage_bucket": "fir-test-cf0fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756414774992:android:1f4d6ee15e1883022168d5",
+        "android_client_info": {
+          "package_name": "com.nativefcmtest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV6l_uh9EbetxgsJOe8H81LM-ewR4H5sc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
