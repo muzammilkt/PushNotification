@@ -1,6 +1,7 @@
 import axios from "axios";
+import { Platform } from "react-native";
 
-const DEFAULT_URL = 'http://8080:api'
+const DEFAULT_URL = 'http://localhost:8080/api'
 
 axios.defaults.withCredentials = true;
 let API = axios.create({
@@ -12,7 +13,6 @@ API.interceptors.request.use(
     async (config) => {
         config.headers = {
             Accept: "application/json",
-            device: "mobile",
         };
         return config;
     },
@@ -25,11 +25,11 @@ API.interceptors.request.use(
 API.interceptors.response.use(
     (response) => response,
     async error => {
-        const originalRequest = error.config;
-        if (error.response.status === 498 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            return API(originalRequest)
-        }
+        console.log(Platform.OS, error);
+        // if (error.response.status === 498 && !originalRequest._retry) {
+        //     originalRequest._retry = true;
+        //     return API(originalRequest)
+        // }
         return Promise.reject(error);
     }
 )

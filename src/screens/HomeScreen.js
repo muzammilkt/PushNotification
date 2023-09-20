@@ -1,45 +1,12 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import RazorpayCheckout from 'react-native-razorpay';
 
 
-import { View, Text, Platform, Modal, TextInput, StyleSheet, Button, FlatList, Alert } from 'react-native'
+import { View, Text, StyleSheet, Button, FlatList, Alert } from 'react-native'
 import AddItemForm from '../components/AddItemForm';
 import ItemCard from '../components/ItemCard';
-
-
-const items = [
-    {
-        id: 1,
-        item: "Adidas Boot",
-        description: "One of the best",
-        amount: 1000
-    },
-    {
-        id: 2,
-        item: "Adidas Boot",
-        description: "One of the best",
-        amount: 2000
-    },
-    {
-        id: 3,
-        item: "Adidas Boot",
-        description: "One of the best",
-        amount: 3000
-    },
-    {
-        id: 4,
-        item: "Adidas Boot",
-        description: "One of the best",
-        amount: 4000
-    },
-    {
-        id: 5,
-        item: "Adidas Boot",
-        description: "One of the best",
-        amount: 5000
-    },
-]
+import { DeleteProduct, ListAllProducts } from '../services/productService';
 
 export default function HomeScreen() {
 
@@ -48,13 +15,58 @@ export default function HomeScreen() {
         setModalVisibility(true);
     }
 
+    const [data, setData] = useState([]);
+    const [triggetApi, setTriggerApi] = useState(Date.now());
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    async function getProducts() {
+        const response = await ListAllProducts();
+        setData(response.data);
+    }
+
+    async function deleteItem(item) {
+        try {
+            Alert.prompt(
+                `Delete ${item.item}`,
+                "Are you sure you want to delete this item?",
+                [
+                    {
+                        text: "Cancel",
+                        style: "cancel",
+                    },
+                    {
+                        text: "OK",
+                        onPress: async () => {
+                            const response = await DeleteProduct(item._id);
+                            setData(prev => prev.filter((i) => i._id != item._id))
+                        },
+                    },
+                ],
+                {
+                    cancelable: false, // Prevents the dialog from being dismissed by tapping outside
+                    placeholder: 'Type DELETE to confirm', // Optional placeholder text
+                }
+            );
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    const onButtonClick = (mode = "EDIT", item) => {
+        setSelectedItem(item)
+        if (mode == "EDIT") setModalVisibility(true);
+        if (mode == "PAY") onPayButtonPress(item);
+        if (mode == "DELETE") deleteItem(item);
+    }
+
     const onPayButtonPress = (item) => {
         const razorpayOptions = {
             description: item.item,
             image: 'https://i.imgur.com/3g7nmJC.png',
             currency: 'INR',
             key: 'rzp_test_iwD7t2wb7ZuqVo',
-            amount: item.amount,
+            amount: item.amount * 100, // Convert INR to paise
             name: 'RazorpayTest',
             prefill: {
                 email: 'void@razorpay.com',
@@ -69,14 +81,19 @@ export default function HomeScreen() {
             console.log(error)
         });
     }
+    useEffect(() => { getProducts() }, [triggetApi])
+
 
     return (
         <View style={styles.container}>
-            <AddItemForm
+            {modalVisibility && <AddItemForm
                 modalVisibility={modalVisibility}
                 setModalVisibility={setModalVisibility}
                 onPayButtonPress={onPayButtonPress}
-            />
+                item={selectedItem}
+                setSelectedItem={setSelectedItem}
+                setTriggerApi={setTriggerApi}
+            />}
             <Text style={styles.titleText}>Sample Store</Text>
             <View style={styles.listView}>
                 <View style={styles.button}>
@@ -88,13 +105,13 @@ export default function HomeScreen() {
                     />
                 </View>
                 <FlatList
-                    data={items}
+                    data={data}
                     renderItem={({ item, index }) => <ItemCard
                         item={item}
-                        key={index}
-                        onPayButtonPress={onPayButtonPress}
+                        key={item._id}
+                        onButtonClick={onButtonClick}
                     />}
-                    keyExtractor={((item) => item.id)}
+                    keyExtractor={((item) => item._id)}
                     contentContainerStyle={styles.listContianer}
                 />
             </View>

@@ -13,7 +13,7 @@ const AppStack = () => {
 
     useEffect(() => {
         // registerForRemoteMessages()
-        generateFcmToken();
+        // generateFcmToken();
     }, [])
 
     return (

@@ -1,25 +1,38 @@
 import { View, Text, Modal, StyleSheet, Button } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TextInput } from 'react-native-gesture-handler';
+import { CreateProduct, EditProduct } from '../services/productService';
 
-export default function AddItemForm({ modalVisibility, setModalVisibility }) {
-    const [data, setData] = useState({ item: '', discription: '', amount: '' });
+export default function AddItemForm({ modalVisibility, setModalVisibility, item, setSelectedItem, setTriggerApi }) {
+    const [data, setData] = useState({ item: '', description: '', amount: '' });
 
-    const onSubmit = () => {
-        console.log(data);
+    const onSubmit = async () => {
+        if (!item) {
+            const response = await CreateProduct(data);
+        }
+        else {
+            const response = await EditProduct(item._id, data);
+        }
+        onRequestClose();
+        setTriggerApi(Date.now());
     }
 
     const onRequestClose = () => {
         setModalVisibility(false)
-        setData({ item: '', discription: '', amount: '' })
+        setData({ item: '', description: '', amount: '' })
+        setSelectedItem(null)
     }
 
+    useEffect(() => {
+        if (item) setData(item)
+    }, [item, modalVisibility])
 
     return (
         <Modal
             visible={modalVisibility}
             animationType='slide'
             onRequestClose={onRequestClose}
+            key={item}
         >
             <View style={{ marginTop: 100 }}>
                 <TextInput
@@ -31,17 +44,18 @@ export default function AddItemForm({ modalVisibility, setModalVisibility }) {
                 />
                 <TextInput
                     style={styles.input}
-                    value={data.discription}
+                    value={data.description}
                     placeholderTextColor={'gray'}
-                    placeholder='Discription'
-                    onChangeText={(v) => setData({ ...data, discription: v })}
+                    placeholder='Description'
+                    onChangeText={(v) => setData({ ...data, description: v })}
                 />
                 <TextInput
                     style={styles.input}
                     value={data.amount}
                     placeholderTextColor={'gray'}
-                    placeholder='Amount'
+                    placeholder='Amount (in INR)'
                     onChangeText={(v) => setData({ ...data, amount: v })}
+                    inputMode='tel'
                 />
                 <View>
                     <View style={styles.buttonsView}>
@@ -58,6 +72,7 @@ export default function AddItemForm({ modalVisibility, setModalVisibility }) {
                                 color={'cornflowerblue'}
                                 style={styles.button}
                                 onPress={onSubmit}
+                                disabled={Boolean(!data.item && !data.description && !data.amount)}
                             />
                         </View>
                     </View>

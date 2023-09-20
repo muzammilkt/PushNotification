@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native'
 import React from 'react'
 
-export default function ItemCard({ item, onPayButtonPress }) {
+export default function ItemCard({ item, onButtonClick }) {
     return (
         <View style={styles.container}>
             <View style={{ gap: 8 }}>
@@ -10,10 +10,12 @@ export default function ItemCard({ item, onPayButtonPress }) {
             </View>
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => onPayButtonPress(item)}
+                onPress={() => onButtonClick("PAY", item)}
             >
                 <Text>pay ₹{item.amount}</Text>
             </TouchableOpacity>
+            <Pressable><Text style={{ color: 'red' }} onPress={() => onButtonClick("DELETE", item)}>delete</Text></Pressable>
+            <Pressable><Text style={{ color: 'blue' }} onPress={() => onButtonClick("EDIT", item)}>edit</Text></Pressable>
         </View>
     )
 }
